@@ -1,0 +1,272 @@
+<codenotes xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:h="http://www.w3.org/1999/xhtml" xmlns:xi="http://www.w3.org/2001/XInclude"
+	xsi:noNamespaceSchemaLocation="../codenotes.xsd"
+	xsi:schemaLocation="http://www.w3.org/1999/xhtml http://www.w3.org/2002/08/xhtml/xhtml1-strict.xsd"
+	bootstrap="UserData" title="The userdata shell script in bastion existing VPC template">
+
+	
+<!--  ================================================================ -->
+	<artifact id="UserData" type="script">
+		<h:div>
+			<h:ul>
+				<h:li>make a .bashrc file for root ✅</h:li>
+				<h:li>add /usr/local/bin to root's PATH ✅</h:li>
+				<h:li>yum install -y git unzip wget 
+					<h:span style="color:red">Not needed, already in image</h:span></h:li>
+				<h:li>functions cfn_success and cfn_fail to call 
+					<h:a onclick="showNotes('cfn-signal')">cfn-signal()</h:a>
+					and exit appropriately.
+					<h:span style="color:red">Not needed for now</h:span>	
+				</h:li>
+				<h:li>Download and installs the AWS CLI. 
+					<h:span style="color:red">already in image</h:span>
+				</h:li>
+				<h:li>Download and installs helm ✅</h:li>
+				<h:li>Get and source
+					<h:a onclick="showNotes('cfn-tools.sh')">cfn-tools.sh</h:a>	
+					(from the QuickStart S3 bucket)<h:span style="color:red">no longer needed, removed</h:span></h:li>
+				<h:li>Call to <h:a onclick="showNotes('qs_update-os')">qs_update-os</h:a>
+					<h:span style="color:red"> Replaced with yum -y update ✅</h:span></h:li>
+				<h:li>Calls
+					<h:a onclick="showNotes('qs_bootstrap_pip')">qs_bootstrap_pip</h:a>
+					and <h:a onclick="showNotes('qs_aws-cfn-bootstrap')">qs_aws-cfn-bootstrap</h:a>.
+					<h:span style="color:red">Replace with code to install pip ✅</h:span>
+				</h:li>
+				<h:li>pip install boto3 ✅</h:li>
+				<h:li>Call to <h:a onclick="showNotes('cfn-init')">cfn-init</h:a> to:
+					<h:ul>
+						<h:li>config / restart auditd.<h:span style="color:red"> Already in image</h:span> </h:li>
+						<h:li>configure banner <h:span style="color:red">Skip, requires S3 content</h:span></h:li>
+						<h:li>config TCP/X11 forwarding
+							<h:span style="color:red">These options are gone, leaving /etc/ssh/sshd_config as is</h:span>
+						</h:li>
+						<h:li>set up OS.
+							<h:span style="color:red">Disable sudo. Set up periodic security updates (cron)</h:span>✅
+						</h:li>
+						<h:li>set up SSM. <h:span style="color:red"> Already in image</h:span></h:li>
+						<h:li>install EC2 instance connect. <h:span style="color:red"> Already in image</h:span></h:li>
+						<h:li>prevent_process_snooping
+							<h:span style="color:red">Copied code to mount /proc with hidepid</h:span> ✅
+						</h:li>
+						<h:li>request_eip (associate EIPs with instances)
+							<h:span style="color:red">I thnink this does not apply in our usage</h:span>
+						</h:li>
+						<h:li>set up logs (CloudWatch config / start) ✅</h:li>
+					</h:ul>
+				</h:li>
+			</h:ul> 
+		</h:div>
+		<sub artifactID="cfn-signal"/>
+		<sub artifactID="cfn-tools.sh"/>
+		<sub artifactID="qs_aws-cfn-bootstrap"/>
+		<sub artifactID="cfn-init"/>
+	</artifact>
+<!--  ================================================================ -->
+<artifact id="cfn-init" type="script">
+	<h:div>
+		<h:p>Pre-installed in Amazon Linux images.</h:p>
+		<h:p>CloudFormation helper script to initialize CloudFormation based on AWS::CloudFormation::Init.
+			In this UserData script, it is used to:</h:p>
+		<h:ul>
+			<h:li>Configure auditing with 
+				<h:a onclick="showNotes('auditing_configure.sh')">auditing_configure.sh</h:a>
+			</h:li>
+			<h:li>"bootstrap" the bastion with 
+				<h:a onclick="showNotes('bastion_bootstrap.sh')">bastion_bootstrap.sh</h:a>.
+			</h:li>
+			<h:li>
+				Called as 
+				<h:pre>
+				<h:code>
+./bastion_bootstrap.sh --banner ${BannerUrl} --enable ${EnableBanner} \
+--tcp-forwarding ${EnableTCPForwarding} --x11-forwarding ${EnableX11Forwarding}
+				</h:code>
+				</h:pre>
+			</h:li>
+		</h:ul>
+		
+	</h:div>
+	<sub artifactID="auditing_configure.sh"/>
+	<sub artifactID="bastion_bootstrap.sh"/>
+	
+</artifact>
+<!--  ================================================================ -->
+<artifact id="bastion_bootstrap.sh" type="script">
+	<h:div>
+		<h:p></h:p>
+			<h:ul>
+				<h:li>Exports env vars: REGION, ETH0_MAC, EIP_LIST, CWG, LOCAL_IP_ADDRESS, INSTANCE_ID
+					<h:span style="color:red">might need this</h:span>
+				</h:li>
+				<h:li>configure banner, <h:span style="color:red">SKIP this</h:span></h:li>
+				<h:li>enable/disable TCP/X11 forwarding,</h:li>
+				<h:li> setupOS, <h:span style="color:red">Disable sudo here</h:span></h:li>
+				<h:li>setup_logs (CloudWatch), </h:li>
+				<h:li>setup_ssm,</h:li>
+				<h:li> EC2-instance-connect,</h:li>
+				<h:li>prevent_process_snooping, </h:li>
+				<h:li>request_eip.
+					<h:span style="color:red">My guess is we can skip this as we are not exposing IPs</h:span>
+				</h:li>
+			</h:ul>
+	</h:div>
+	<sub artifactID="configure-banner"/>
+	<sub artifactID="tcp-x11-forwarding"/>
+	<sub artifactID="setupOS"/>
+	<sub artifactID="setup_logs"/>
+	<sub artifactID="setup_ssm"/>
+	<sub artifactID="EC2-instance-connect"/>
+	<sub artifactID="prevent_process_snooping"/>
+	<sub artifactID="request_eip"/>
+</artifact>
+<!--  ================================================================ -->
+<artifact id="request_eip" type="script">
+	<h:div>
+			<h:ul>
+				<h:li>Associates Elastic IPs to instances</h:li>
+			</h:ul>
+	</h:div>
+</artifact>
+<!--  ================================================================ -->
+<artifact id="prevent_process_snooping" type="script">
+	<h:div>
+			<h:ul>
+				<h:li>Reconfigures and remounts the /proc filesystem to hide pids</h:li>
+			</h:ul>
+	</h:div>
+</artifact>
+<!--  ================================================================ -->
+<artifact id="EC2-instance-connect" type="script">
+	<h:div>
+			<h:ul>
+				<h:li>Installs ec2-instance-connect with yum</h:li>
+			</h:ul>
+	</h:div>
+</artifact>
+<!--  ================================================================ -->
+<artifact id="setup_ssm" type="script">
+	<h:div>
+			<h:ul>
+				<h:li>Gives sudo to ssm-user</h:li>
+				<h:li>Installs SSM agent</h:li>
+				<h:li>Enables and starts the SSM agent</h:li>
+				<h:li>Installs the SSM plugin for the AWS CLI</h:li>
+			</h:ul>
+	</h:div>
+</artifact>
+<!--  ================================================================ -->
+<artifact id="setup_logs" type="script">
+	<h:div>
+			<h:ul>
+				<h:li>Installs CloudWatch agent with yum</h:li>
+				<h:li>Creates config /opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.json</h:li>
+				<h:li>Enables and restarts CloudWatch agent service</h:li>
+			</h:ul>
+	</h:div>
+</artifact>
+<!--  ================================================================ -->
+<artifact id="setupOS" type="script">
+	<h:div>
+			<h:ul>
+				<h:li>sets env_keep in /etc/sudoers</h:li>
+				<h:li>/sbin/restorecon -v /etc/ssh/sshd_config</h:li>
+				<h:li>Cron for periodic security updates: 
+					<h:pre><h:code>echo "0 0 * * * yum -y update --security" > /etc/cron.d/yum-security-updates</h:code></h:pre>
+				</h:li>
+				<h:li>restarts sshd</h:li>
+			</h:ul>
+	</h:div>
+</artifact>
+<!--  ================================================================ -->
+<artifact id="tcp-x11-forwarding" type="script">
+	<h:div>
+		<h:p>Sets AllowTcpForwarding and X11Forwarding in /etc/ssh/sshd_config</h:p>
+			<h:ul>
+				<h:li></h:li>
+			</h:ul>
+	</h:div>
+</artifact>
+<!--  ================================================================ -->
+<artifact id="configure-banner" type="script">
+	<h:div>
+		<h:p>Makes /etc/ssh_banner from a file in S3</h:p>
+			<h:ul>
+				<h:li></h:li>
+			</h:ul>
+	</h:div>
+</artifact>
+<!--  ================================================================ -->
+<artifact id="auditing_configure.sh" type="script">
+	<h:div>
+		<h:p></h:p>
+			<h:ul>
+				<h:li>make /etc/audit/rules.d/audit.rules</h:li>
+				<h:li>restart auditd</h:li>
+			</h:ul>
+	</h:div>
+	
+</artifact>
+<!--  ================================================================ -->
+<artifact id="qs_aws-cfn-bootstrap" type="script">
+	<h:div>
+		<h:p>Based on OSTYPE and OCVERSION:</h:p>
+			<h:ul>
+				<h:li>updates OS</h:li>
+				<h:li>installs python3/pip</h:li>
+				<h:li>verifies that cfn-signal is installed</h:li>
+			</h:ul>
+	</h:div>
+	
+</artifact>
+<!--  ================================================================ -->
+<artifact id="cfn-signal" type="script">
+	<h:div>
+		<h:p>CloudFormation helper script to emit a signal, for instance, as expected by WaitCondition.
+			In this UserData script, it is used to emit an exit code, 0 or 1, depending on success or failure.
+		</h:p>
+		<h:p>Pre-installed in Amazon Linux images.</h:p>
+	</h:div>
+	
+</artifact>
+<!--  ================================================================ -->
+<artifact id="cfn-tools.sh" type="script">
+	<h:div>
+		<h:p></h:p>
+	</h:div>
+	<sub artifactID="qs_update-os"/>
+	<sub artifactID="qs_bootstrap_pip"/>
+</artifact>
+<!--  ================================================================ -->
+<artifact id="qs_update-os" type="script">
+	<h:div>
+		<h:p>
+			Sets INSTANCE_OSTYPE and INSTANCE_OSVERSION and updates OS accordingly, 
+			(yum / apt-get / zypper)
+		</h:p>
+	</h:div>
+	<sub artifactID="qs_get-ostype"/> 
+	<sub artifactID="qs_get-osversion"/>
+   
+
+</artifact>
+<!--  ================================================================ -->
+<artifact id="qs_get-ostype" type="script">
+	<h:div>
+		<h:p>Returns OS type based on /etc/*-release</h:p>
+	</h:div>
+</artifact>
+<!--  ================================================================ -->
+<artifact id="qs_get-osversion" type="script">
+	<h:div>
+		<h:p>Returns OS version based on /etc/*-release</h:p>
+	</h:div>
+</artifact>
+<!--  ================================================================ -->
+<artifact id="qs_bootstrap_pip" type="script">
+	<h:div>
+		<h:p></h:p>
+	</h:div>
+
+</artifact>
+
+</codenotes>

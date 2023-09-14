@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!--Created with Liquid XML Studio - FREE Community Edition 7.0.0.604 (http://www.liquid-technologies.com)-->
+  <!-- 
+	* The actual code notes are written in an HTML div, therefore the xhtml namespace and schema
+	are imported.
+	* The codenotes document would contain notes about any number of programmatic artifacts.
+	* The document must have a title attribute to serve as a descriptive heading.
+	* Artifacts must have an id attribute.
+	* One of the artifacts must be identified as the bootstrap artifact, i.e. the start of the 
+	processing annotated in the codenotes document. The bootstrap attribute must be set to 
+	the id of the bootstrap artifact.
+	* Artifacts may be of type java, script, html, or webservice. The codenotes Javascript application
+	reflects the type via an icon (this is the only known use of the type attribute).
+	* Artifact elements contain an HTML div with the actual notes (HTML is used to format
+	the documentation)
+	* Artifact elements model programmatic sub-components (invoked functions, methods,
+	etc.) as 'sub' elements which refer to the subordinate artifact by id.
+	* In case the subordinate element has been defined in another document, the subRef element would
+	be used with an artifactURI attribute identifying the artifact fragment in the external document.
+	* If the hierarchy is very large, it may be continued in a separate codenotes document which is 
+	linked via the drilldown element.
+	If several documents are used for a system, such as to drill down, then they are "related". Documents may include 
+	references to related documents (such as to return from a drill-down) via "related" elements. 
+	document.
+	That's it!
+	-->
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:h="http://www.w3.org/1999/xhtml">  
+  <xsd:import schemaLocation="http://www.w3.org/2002/08/xhtml/xhtml1-strict.xsd" namespace="http://www.w3.org/1999/xhtml" />
+  <xsd:group name="subGroup">
+    <xsd:sequence>
+      <xsd:element minOccurs="0" maxOccurs="unbounded" name="sub">
+        <xsd:complexType>
+          <xsd:attribute name="artifactID" type="xsd:IDREF" />
+        </xsd:complexType>
+      </xsd:element>
+      <xsd:element minOccurs="0" maxOccurs="unbounded" name="subRef">
+        <xsd:complexType>
+          <xsd:attribute name="artifactURI" type="xsd:anyURI" />
+        </xsd:complexType>
+      </xsd:element>
+    </xsd:sequence>
+  </xsd:group>
+  <xsd:element name="codenotes">
+    <xsd:complexType>
+      <xsd:sequence>
+        <xsd:element minOccurs="0" maxOccurs="unbounded" name="related">
+          <xsd:complexType>
+            <xsd:attribute name="docURI" type="xsd:anyURI" use="optional" />
+          </xsd:complexType>
+        </xsd:element>
+        <xsd:element minOccurs="1" maxOccurs="unbounded" name="artifact">
+          <xsd:complexType>
+            <xsd:sequence>
+              <xsd:element minOccurs="0" maxOccurs="1" ref="h:div" />
+              <xsd:choice>
+                <xsd:group minOccurs="0" maxOccurs="unbounded" ref="subGroup" />
+                <xsd:element minOccurs="0" maxOccurs="1" name="drilldown">
+                  <xsd:complexType>
+                    <xsd:attribute name="docURI" type="xsd:anyURI" use="required" />
+                  </xsd:complexType>
+                </xsd:element>
+              </xsd:choice>
+            </xsd:sequence>
+            <xsd:attribute name="id" type="xsd:ID" use="required" />
+            <xsd:attribute name="type" use="required">
+              <xsd:simpleType>
+                <xsd:restriction base="xsd:string">
+                  <xsd:enumeration value="html" />
+                  <xsd:enumeration value="script" />
+                  <xsd:enumeration value="java" />
+                  <xsd:enumeration value="webservice" />
+                  <xsd:enumeration value="xml" />
+                </xsd:restriction>
+              </xsd:simpleType>
+            </xsd:attribute>
+          </xsd:complexType>
+        </xsd:element>
+      </xsd:sequence>
+      <xsd:attribute name="bootstrap" type="xsd:IDREF" use="required" />
+      <xsd:attribute name="title" type="xsd:string" use="required" />
+    </xsd:complexType>
+  </xsd:element>
+</xsd:schema>

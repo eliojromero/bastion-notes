@@ -1,0 +1,78 @@
+  body{
+	font-family: "Liberation Serif";
+}
+  #title {
+  	font-weight: bold;
+  	font-size: xx-large;
+  }
+  #titleDiv {
+  	border-bottom: thin solid black;
+  	margin: auto;
+  	width: 98%;
+  	height: 8%;
+  }
+  
+  .popup {
+  	background-color: white;
+  	border: thin solid black;
+  	padding: 1em;
+  	position: absolute;
+	/*left:30%;*/
+  	width:15%;
+  	z-index:3;
+  }
+ 
+  }popup * {
+  	font-size: small;
+  }
+  
+  #treeDiv {
+  	float: left;
+  	width: 48%;
+  	height: 87%;
+  	overflow-x: hidden;
+  	overflow-y: auto;
+  	border-right: thin solid black;
+  	margin: 0;
+  	padding: 4;
+  }
+  #notesDiv {
+  	margin: 0;
+  	width: 48%;
+  	height: 87%;
+  	overflow: auto;
+  	float: right;
+  	padding: 4;
+  }
+  #notesDiv div {
+  	position: relative;
+  	z-index:2;
+  }
+  .artDiv {
+  	position: relative;
+  }
+  .artDiv span {
+  	vertical-align: top;
+  }
+  .artDiv span:hover {
+  	text-decoration: underline;
+  	cursor: pointer;
+  }
+  dt {
+  	font-weight: bold;
+  }
+  div>dl>dt {
+	font-size: larger;
+  }
+  em {
+	color: #34a5eb;
+  }
+  li{
+	margin: 0.5em;
+  }
+  #notesDiv a {
+  	color: blue;
+  	font-style: italic;
+  	text-decoration: underline;
+  	cursor: pointer;
+  }
