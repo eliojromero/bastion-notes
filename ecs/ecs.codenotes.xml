@@ -1,0 +1,630 @@
+<codenotes xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:h="http://www.w3.org/1999/xhtml" xmlns:xi="http://www.w3.org/2001/XInclude"
+	xsi:noNamespaceSchemaLocation="../codenotes.xsd"
+	xsi:schemaLocation="http://www.w3.org/1999/xhtml http://www.w3.org/2002/08/xhtml/xhtml1-strict.xsd"
+	bootstrap="tharp-app" title="tharp-app code notes">
+<!--  ================================================================ -->
+	<artifact id="tharp-app" type="webservice">
+		<h:div> 
+		<h:p>These notes pertain only to the back-end code of the THARP application.</h:p>
+		<h:p>THARP=The Heuristic Archive Repository Program</h:p>
+		<h:p>The THARP application produces a graph database
+		with metadata documenting the archive inventory in the Colorado on-prem archive 
+		for the Extended Continental Shelf project.</h:p>
+		<h:p>Describes relationships</h:p>
+			<h:ul>
+				<h:li>Parent-child relationships between and within archived (on tape) objects.</h:li>
+			</h:ul>
+		<h:p>Describes locations of files</h:p>
+			<h:ul>
+				<h:li>Pointers to the data.</h:li>
+			</h:ul>
+		<h:p>Uses Spring Boot MVC.</h:p>
+		
+		</h:div>
+		<sub artifactID="api"/>
+		<sub artifactID="model"/>
+		<sub artifactID="view"/>
+		<sub artifactID="data"/>		
+	</artifact>
+<!--  ================================================================ -->
+	<artifact id="api-v1-archive" type="api" alt="/api/v1/archive">
+		<h:div>GET: Returns paged archive files matching query parameters.
+		<h:p>Valid parameters: filepath, page, itemsPerPage, order (default sort=filepath:asc)</h:p>
+		<h:p>Model: <h:a onclick="showNotes('ArchiveFileService')">ArchiveFileService</h:a>.</h:p>
+		</h:div>	
+	</artifact>
+<!--  ================================================================ -->
+	<artifact id="api-v1-catalog" type="api" alt="/api/v1/catalog">
+		<h:div>
+			Create, read, update and delete <h:a onclick="showNotes('CatalogItemView')" >catalog items</h:a>. 
+			Model:<h:a onclick="showNotes('CombinedCatalogService')">CombinedCatalogService</h:a>
+					
+					<h:p>POST: Create a catalog item<h:br/>
+					combinedCatalogService.create(<h:a onclick="showNotes('CatalogItemView')">catalogItemView</h:a>)
+					</h:p>				
+					
+					<h:p>GET: Returns paged catalog items matching search parameters<h:br/>
+					Valid search parameters: name, type, page, itemsPerPage, order (default sort=id:asc)<h:br/>
+					combinedCatalogService.search(searchParameters)
+					</h:p>
+					
+					<h:p>GET /{id}: Returns paged catalog items attached to a specific id, matching query parameters.<h:br/>
+					combinedCatalogService.searchById(searchParameters, id)
+					</h:p>
+					
+					<h:p>PUT /{id}: Updates a catalog item's attachments and properties.<h:br/>
+					combinedCatalogService.update(id, updateCatalogItemView)</h:p>			
+					
+					<h:p>DELETE /{id}: Deletes a catalog item.<h:br/>
+					combinedCatalogService.delete(id)</h:p>
+		</h:div>	
+	</artifact>
+<!--  ================================================================ -->
+	<artifact id="api-v1-export" type="api" alt="/api/v1/export">
+		<h:div>Export records and tags matching request parameters to CSV file. Model:<h:a onclick="showNotes('ExportService')">ExportService</h:a>
+						<h:p>Valid request parameters: page, itemsPerPage, order (default sort=id:asc), outPutFile
+						</h:p>
+						<h:p>GET records/files: Export file records. exportService.<h:br/>
+							exportFiles(exportParameters, outputStream)
+						</h:p>
+						<h:p>GET records/archive-files: Export archive file records. <h:br/>
+							exportService.exportArchiveFiles(exportParameters, outputStream)
+						</h:p>
+						<h:p>GET /tags: Export tags.<h:br/>
+							exportService.exportTags(exportParameters, outputStream)
+						</h:p>
+		</h:div>	
+	</artifact>
+<!--  ================================================================ -->
+	<artifact id="api-v1-me" type="api" alt="/api/v1/me">
+		<h:div>Read and update current user. Model:<h:a onclick="showNotes('UserService')">UserService</h:a>
+						<h:p>GET. Read current user. userService.getUser()</h:p>
+						<h:p>PUT. Update current user. userService.getUser()</h:p>
+		</h:div>	
+	</artifact>
+<!--  ================================================================ -->
+	<artifact id="api-v1-record" type="api" alt="/api/v1/record">
+		<h:div>Create, read, update and delete records. 
+						Model:<h:a onclick="showNotes('RecordService')">RecordService</h:a> 
+						and <h:a onclick="showNotes('CombinedRecordService')">CombinedRecordService</h:a>.
+						<h:p>POST /file: Create a file record.<h:br/>
+						combinedRecordService.createFile(writeFileView)
+						</h:p>
+						<h:p>POST /archive-file: Create an archive file record.<h:br/>
+						combinedRecordService.createArchiveFile(writeArchiveFileView)
+						</h:p>
+						<h:p>GET /{recordId} Get a record by ID.<h:br/>
+						recordService.getRecord(recordId)
+						</h:p>
+						<h:p>GET: /file/detail/{recordId}: Get a detailed file record by ID.<h:br/>
+						recordService.getDetailedFile(recordId)
+						</h:p>
+						<h:p>GET /archive-file/detail/{recordId}: Get a detailed archive file record by ID.<h:br/>
+						recordService.getDetailedArchiveFile(recordId)
+						</h:p>
+						<h:p>GET: Returns paged records matching query parameters.<h:br/>
+						recordService.getRecords(searchParameters)
+						</h:p>
+						<h:p>GET /detail: Returns paged detailed records matching query parameters <h:br/>
+						recordService.getDetailedFiles(searchParameters)
+						</h:p>
+						<h:p>PUT /file/{recordId}: Update a file record. <h:br/>
+						combinedRecordService.updateFile(recordId, writeFileView)
+						</h:p>
+						<h:p>PUT /archive-file/{recordId}: Update an archive file record. <h:br/>
+						combinedRecordService.updateArchiveFile(recordId, writeArchiveFileView)
+						</h:p>
+						<h:p>DELETE /{recordId}: Delete a record by ID.<h:br/>
+						combinedRecordService.deleteFile(recordId)
+						</h:p>					
+					
+		</h:div>	
+	</artifact>
+<!--  ================================================================ -->
+	<artifact id="api-v1-stats" type="api" alt="/api/v1/stats">
+		<h:div>
+			Get stats about the catalog. Model:<h:a onclick="showNotes('StatsService')">StatsService</h:a>.
+						<h:p>GET: Get stats about the catalog.<h:br/>
+						statsService.getStats()
+						</h:p>				
+
+		</h:div>	
+	</artifact>
+<!--  ================================================================ -->
+	<artifact id="api-v1-tag" type="api" alt="/api/v1/tag">
+		<h:div>
+			Create, read, update and delete tags. Model:<h:a onclick="showNotes('TagService')">TagService</h:a>
+						<h:p>POST: Create a tag.<h:br/>
+						tagService.createTag(tagView)
+						</h:p>
+						<h:p>GET /{tagId}: Get a tag by ID<h:br/>
+						tagService.getTag(tagId)
+						</h:p>
+						<h:p>GET: Returns paged tags matching query parameters.<h:br/>
+						Valid query parameters: page, itemsPerPage, order (default sort=name:asc)
+						tagService.getTags(searchParameters)
+						</h:p>
+						<h:p>PUT /{tagId}: Update a tag.<h:br/>
+						tagService.updateTag(tagId, tagView)
+						 </h:p>
+						<h:p>
+						DELETE /{tagId}: Delete a tag by ID.<h:br/>
+						tagService.deleteTag(tagId)
+						</h:p>
+		</h:div>	
+	</artifact>
+<!--  ================================================================ -->
+	<artifact id="api-v1-token" type="api" alt="/api/v1/token">
+		<h:div>
+			Generate access tokens and mint JSON Web Tokens. 
+						Model:<h:a onclick="showNotes('TokenGenerator')">TokenGenerator</h:a>.
+						<h:p>GET /generate/value: Generate access token.<h:br/>
+						tokenGenerator.generateTokenValue()
+						</h:p>
+						<h:p>POST /generate/jwt: Mint a JSON Web Token.<h:br/>
+						tokenGenerator.generateJwt
+						</h:p>
+		</h:div>	
+	</artifact>
+<!--  ================================================================ -->
+	<artifact id="api-v1-upload" type="api" alt="/api/v1/upload">
+		<h:div>
+			Upload records and tags.
+						Uploads run in new threads. Job id is a random uuid.
+						Model:<h:a onclick="showNotes('UploadService')">UploadService</h:a>.
+						<h:p>POST /records/files: Generates file records from CSV file upload<h:br/>
+							uploadService.importFiles(file, jobId). 
+						</h:p>
+						<h:p>POST /records/archive-files: Generates archive file records from CSV file upload.<h:br/>
+							uploadService.importArchiveFiles(file, jobId). 
+						</h:p>
+						<h:p>PUT /records/files: Updates file records from CSV file upload.<h:br/>
+							uploadService.updateFiles(file, jobId).
+						</h:p>
+						<h:p>PUT /records/archive-files: Updates archive file records from CSV file upload.<h:br/>
+							uploadService.updateArchiveFiles(file, jobId)
+						</h:p>
+						<h:p>POST /tags: Generates tags from CSV file upload.<h:br/>
+						uploadService.importTags(file, jobId)
+						</h:p>
+						<h:p>PUT /tags: Updates tags from CSV file upload. <h:br/>
+							uploadService.updateTags(file, jobId).
+						</h:p>
+						<h:p>GET /status/{jobId}: Returns percent complete for an individual CSV upload.<h:br/>
+							uploadService.getJobStatus(jobId)
+						</h:p>
+		</h:div>	
+	</artifact>
+<!--  ================================================================ -->
+	<artifact id="api-v1-user" type="api" alt="/api/v1/user">
+		<h:div>
+			Create, read, update and delete users.
+						Model:<h:a onclick="showNotes('UserService')">UserService</h:a>.
+						<h:p>POST.  Create a user.<h:br/>
+							userService.createUser(user).
+						</h:p>
+						<h:p>GET /{username}: Get a user by username.<h:br/>
+							 userService.getUser(username)
+						</h:p>
+						<h:p>GET: Search users.<h:br/>
+							Returns paged users matching query parameters
+						</h:p>
+						<h:p>PUT /{username}: Update a user. <h:br/>
+							userService.updateUser(username, user)
+						</h:p>
+						<h:p>DELETE /{username}: Delete a user by username.<h:br/>
+							userService.deleteUser(username)
+						 </h:p>
+		</h:div>	
+	</artifact>
+<!--  ================================================================ -->
+	<artifact id="api" type="spring" alt="API MVC implementation - Controller layer">
+
+		<h:div>
+			<h:p>Following the Model-View-Controller (MVC) design pattern,
+			 API routes are mapped to service methods (the <h:i>model</h:i> implementation) by
+			controller classes in Java package <h:i>gov.noaa.ncei.cmg.tharp.api.controller</h:i>.
+			</h:p>
+			<h:p>The service classes in package <h:i>gov.noaa.ncei.cmg.tharp.api.service</h:i> operate on 
+		  <h:i>view</h:i> objects from <h:i>gov.noaa.ncei.cmg.tharp.api.view.*</h:i> classes
+		  which describe archive items.
+			</h:p>
+			<h:p>The links below contain descriptions of the API end-points and 
+				corresponding implementation methods:
+			</h:p>
+			<h:ul>
+				<h:li><h:a onclick="showNotes('api-v1-archive')">/api/v1/archive</h:a></h:li>
+				<h:li><h:a onclick="showNotes('api-v1-catalog')">/api/v1/catalog</h:a></h:li>
+				<h:li><h:a onclick="showNotes('api-v1-export')">/api/v1/export</h:a></h:li>
+				<h:li><h:a onclick="showNotes('api-v1-me')">/api/v1/me</h:a></h:li>
+				<h:li><h:a onclick="showNotes('api-v1-record')">/api/v1/record</h:a></h:li>
+				<h:li><h:a onclick="showNotes('api-v1-stats')">/api/v1/stats</h:a></h:li>
+				<h:li><h:a onclick="showNotes('api-v1-tag')">/api/v1/tag</h:a></h:li>
+				<h:li><h:a onclick="showNotes('api-v1-token')">/api/v1/token</h:a></h:li>
+				<h:li><h:a onclick="showNotes('api-v1-upload')">/api/v1/upload</h:a></h:li>
+				<h:li><h:a onclick="showNotes('api-v1-user')">/api/v1/user</h:a></h:li>
+			</h:ul>
+		</h:div>		
+		<sub artifactID="api-v1-archive"/>
+		<sub artifactID="api-v1-catalog"/>
+		<sub artifactID="api-v1-export"/>
+		<sub artifactID="api-v1-me"/>
+		<sub artifactID="api-v1-record"/>
+		<sub artifactID="api-v1-stats"/>
+		<sub artifactID="api-v1-tag"/>
+		<sub artifactID="api-v1-token"/>
+		<sub artifactID="api-v1-upload"/>
+		<sub artifactID="api-v1-user"/>
+		
+	</artifact>
+<!--  ================================================================ -->
+	<artifact id="data" type="graph" alt="Spring Data Neo4j">
+		<h:div>Lower level service classes (e.g. CatalogService as opposed to CombinedCatalogService) contain
+			 <h:a onclick="showNotes('Repositories')">entity-specific Spring Data Neo4j repository interfaces</h:a>
+			 to access the Neo4j graph database as well as a Neo4jTemplate which implements Neo4j operations such as  
+					<h:i>count</h:i>,<h:i>deleteById</h:i>, etc.
+		</h:div>
+		<sub artifactID="Entities"/>
+		<sub artifactID="Repositories"/>
+		
+	</artifact>
+<!--  ================================================================ -->
+	<artifact id="view" type="spring" alt="View Layer">
+		<sub artifactID="Record"/>
+		<sub artifactID="CatalogItemView"/>
+		<sub artifactID="WriteFileView"/>
+		<sub artifactID="TagView"/>
+	</artifact>
+<!--  ================================================================ -->
+	<artifact id="WriteFileView" type="java">
+		<h:div>Builds a <h:i>file</h:i> item with the following properties:
+			<h:ul>
+				<h:li>id</h:li>
+				<h:li>version</h:li>
+				<h:li>filePath</h:li>
+				<h:li>dataTypes</h:li>
+				<h:li>productTypes</h:li>
+				<h:li>regions</h:li>
+				<h:li>fileExtension</h:li>
+				<h:li>customTags</h:li>
+				<h:li>childRecords</h:li>
+				<h:li>parentRecords</h:li>
+				<h:li>attachedFiles</h:li>
+				<h:li>relatedRecords</h:li>
+				<h:li>archiveFile</h:li>
+			</h:ul>
+		</h:div>
+	</artifact>
+<!--  ================================================================ -->
+	<artifact id="TagView" type="java">
+		<h:div>Builds a <h:i>tag</h:i> item with the following properties:
+			<h:ul>
+				<h:li>id</h:li>
+				<h:li>version</h:li>
+				<h:li>name</h:li>
+				<h:li>tag</h:li>
+			</h:ul>
+		</h:div>
+	</artifact>
+<!--  ================================================================ -->
+	<artifact id="CatalogItemView" type="java">
+		<h:div>Catalog items have 
+			<h:ul>
+				<h:li>Id</h:li>
+				<h:li>Version</h:li>
+				<h:li>Name</h:li>
+				<h:li>List of related items</h:li>
+				<h:li>Type. One of:
+					<h:ul>
+						<h:li>File. This type of item is built by <h:a onclick="showNotes('WriteFileView')">WriteFileView.Builder</h:a>.</h:li>
+						<h:li>ArchiveFile</h:li>
+						<h:li>DataType, built by <h:a onclick="showNotes('TagView')">TagView.Builder</h:a>.</h:li>
+						<h:li>ProductType, built by <h:a onclick="showNotes('TagView')">TagView.Builder</h:a>.</h:li>
+						<h:li>Region, built by <h:a onclick="showNotes('TagView')">TagView.Builder</h:a>.</h:li>
+						<h:li>FileExtension</h:li>
+						<h:li>CustomTag, built by <h:a onclick="showNotes('TagView')">TagView.Builder</h:a>.</h:li>
+					</h:ul>				
+				</h:li>
+			</h:ul>
+		</h:div>
+	</artifact>
+<!--  ================================================================ -->
+	<artifact id="Entities" type="graph">
+	<h:div> 
+		<h:p>Package gov.noaa.ncei.cmg.tharp.data.entity</h:p>
+		<h:p>Contains entity classes with entity relationships
+			as well as corresponding classes defining entity name, node name, and properties.
+		</h:p>
+		<h:p>The list below shows the entity taxonomy:</h:p>
+		<h:ul>
+			<h:li>AuthorityEntity</h:li>
+			<h:li>CatalogEntity</h:li>
+			<h:ul>
+				<h:li>RecordEntity</h:li>
+			    <h:ul>
+			    	<h:li>ArchiveFileEntity</h:li>
+			    	<h:li>FileEntity</h:li>
+			    </h:ul>
+			    <h:li>TagEntity</h:li>
+			    <h:ul>
+					<h:li>CustomTagEntity</h:li>
+					<h:li>FileExtensionEntity</h:li>
+					<h:li>ProductTypeEntity</h:li>
+					<h:li>RegionEntity</h:li>
+				</h:ul>
+			</h:ul>
+			<h:li>DataTypeEntity</h:li>	
+			<h:li>TagType</h:li>
+			<h:li>TokenEntity</h:li>
+			<h:li>UserEntity</h:li>
+		</h:ul>
+	</h:div>
+	<sub artifactID="ArchiveFileEntity"/>
+	</artifact>
+<!--  ================================================================ -->
+	<artifact id="ArchiveFileEntity" type="java">
+		<h:div>
+			<h:ul>
+				<h:li>Node: ArchiveFile</h:li>
+				<h:li>Relationship: Incoming MAPPED_TO_ARCHIVE_FILE</h:li>
+				<h:li>Children are type FileEntity</h:li>	
+			</h:ul>
+		</h:div>
+	</artifact>
+<!--  ================================================================ -->
+	<artifact id="Record" type="java">
+		<h:div> Interface with methods
+			<h:ul>
+				<h:li>getId()</h:li>
+				<h:li>getVersion()</h:li>
+				<h:li>getFilePath()</h:li>
+				<h:li>getType()</h:li>	
+			</h:ul>
+		</h:div>
+	</artifact>
+<!--  ================================================================ -->
+	<artifact id="Repositories" type="graph">
+		<h:div>
+		<h:p>Package gov.noaa.ncei.cmg.tharp.data.repository contains the repository classes.</h:p>
+		<h:p>Each repository is a 
+		<h:a href="https://docs.spring.io/spring-data/data-neo4j/docs/current/api/org/springframework/data/neo4j/repository/Neo4jRepository.html">
+			Neo4jRepository</h:a> for its corresponding entity type.</h:p>
+		
+		<h:p><h:i>Neo4jRepository</h:i> is a Spring framework interface that provides basic CRUD methods specifically for Neo4j.
+		</h:p>
+		<h:p>Repositories also extend other interfaces from Spring Data Neo4j, such as 
+			<h:a href="https://docs.spring.io/spring-data/data-neo4j/docs/current/api/org/springframework/data/neo4j/repository/support/CypherdslStatementExecutor.html">
+				CypherdslStatementExecutor</h:a>, to fully customize queries. 
+		</h:p>
+		
+		<h:p>The repository classes are:</h:p>
+		<h:ul>
+			<h:li>ArchiveFileRepository</h:li>
+			<h:li>AuthorityRepository</h:li>
+			<h:li>CatalogRepository</h:li>
+			<h:li>RecordRepository</h:li>
+			<h:li>TagRepository</h:li>
+			<h:li>TokenRepository</h:li>
+			<h:li>UserRepository</h:li>
+		</h:ul>
+		</h:div>
+	</artifact>
+<!--  ================================================================ -->
+	<artifact id="model" type="spring" alt="Model layer">
+		<h:div>
+			Service classes use
+			 <h:a onclick="showNotes('Repositories')">entity-specific Spring Data Neo4j repository interfaces</h:a>
+			 as well as a 
+			 <h:a href="https://docs.spring.io/spring-data/neo4j/docs/current/api/org/springframework/data/neo4j/core/Neo4jTemplate.html">
+			 	Neo4jTemplate</h:a> 
+			 to perform operations on the graph database.
+			 <h:p>Queries are built with the
+			 	<h:a href="https://neo4j-contrib.github.io/cypher-dsl/2023.9.2/">Neo4J Cypher-DSL</h:a>.
+			 </h:p>
+			 <h:ul>
+			 	<h:li><h:a onclick="showNotes('ArchiveFileService')">ArchiveFileService</h:a></h:li>
+			 	<h:li><h:a onclick="showNotes('CombinedCatalogService')">CombinedCatalogService</h:a></h:li>
+			 	<h:li><h:a onclick="showNotes('CatalogService')">CatalogService</h:a></h:li>
+			 	<h:li><h:a onclick="showNotes('ExportService')">ExportService</h:a></h:li>
+			 	<h:li><h:a onclick="showNotes('CombinedRecordService')">CombinedRecordService</h:a></h:li>
+			 	<h:li><h:a onclick="showNotes('RecordService')">RecordService</h:a></h:li>
+			 	<h:li><h:a onclick="showNotes('StatsService')">StatsService</h:a></h:li>
+			 	<h:li><h:a onclick="showNotes('TagService')">TagService</h:a></h:li>
+			 	<h:li><h:a onclick="showNotes('TokenGenerator')">TokenGenerator</h:a></h:li>
+			 	<h:li><h:a onclick="showNotes('UploadService')">UploadService</h:a></h:li>
+			 	<h:li><h:a onclick="showNotes('UserService')">UserService</h:a></h:li>
+			 </h:ul>
+		</h:div>
+		<sub artifactID="ArchiveFileService"/>
+		<sub artifactID="CombinedCatalogService"/>
+		<sub artifactID="CatalogService"/>
+		<sub artifactID="ExportService"/>
+		<sub artifactID="CombinedRecordService"/>
+		<sub artifactID="RecordService"/>
+		<sub artifactID="StatsService"/>
+		<sub artifactID="TagService"/>
+		<sub artifactID="TokenGenerator"/>
+		<sub artifactID="UploadService"/>
+		<sub artifactID="UserService"/>
+	</artifact>
+<!--  ================================================================ -->
+	<artifact id="ArchiveFileService" type="java">	
+		<h:div>gov.noaa.ncei.cmg.tharp.service.ArchiveFileService
+			<h:p>Repository: <h:a onclick="showNotes('Repositories')">ArchiveFileRepository</h:a></h:p>
+			<h:p>Entity: <h:a onclick="showNotes('ArchiveFileEntity')">ArchiveFileEntity</h:a></h:p>
+			<h:h4 style="font-size: 125%">Public methods:</h:h4>
+			<h:dl>
+				<h:dt>getArchiveFile(String filePath)</h:dt>
+					<h:dd>
+						<h:ul style="line-height:80%">
+							<h:li>Returns one <h:a onclick="showNotes('Record')"><h:i>Records</h:i></h:a>.</h:li>
+							<h:li>CypherdslStatementExecutor.find()</h:li>
+							<h:li>Condition: the <h:i>ArchiveFile</h:i> node filepath property matches the argument</h:li>
+						</h:ul>
+					</h:dd>
+									
+				<h:dt>getArchiveFiles(ArchiveFileSearchParameters searchParameters)</h:dt>
+					<h:dd>
+						<h:ul style="line-height:80%">
+							<h:li>Returns all <h:a onclick="showNotes('Record')"><h:i>Records</h:i></h:a>, paginated.</h:li>
+							<h:li>CypherdslStatementExecutor.findAll</h:li>
+							<h:li>Condition: an <h:i>ArchiveFile</h:i> node filepath property matches the search argument</h:li>
+						</h:ul>
+					</h:dd>								
+				<h:dt>deleteArchiveFile(Long archiveFileId)</h:dt>
+					<h:dd>
+						<h:ul style="line-height:80%">
+							<h:li>archiveFileRepository.deleteById(archiveFileId)</h:li>
+						</h:ul>				
+					</h:dd>
+			</h:dl>
+		</h:div>
+	</artifact>
+<!--  ================================================================ -->
+	<artifact id="CombinedCatalogService" type="java">
+		<h:div>gov.noaa.ncei.cmg.tharp.service.CombinedCatalogService
+			<h:p>CombinedCatalogService wraps lower level <h:a onclick="showNotes('model')">model layer</h:a> classes as it manages
+			catalog items of various types:
+			</h:p>
+			<h:ul>
+				<h:li>Types File and ArchiveFile are managed with RecordService / CombinedRecordService.</h:li>
+				<h:li>The tag types (DataType, ProductType, Region, and CustomTag) are managed with TagService.</h:li>
+			</h:ul>
+			<h:h4 style="font-size: 150%">Public wrapper methods:</h:h4>
+						<h:dl style="line-height:130%">
+							<h:dt>search(CatalogSearchParameters searchParameters)</h:dt>
+								<h:dd>Uses CatalogService to return CatalogItemView items</h:dd>
+							<h:dt>searchById(CatalogSearchParameters searchParameters, Long id)</h:dt>
+								<h:dd>Uses CatalogService to return CatalogItemView items</h:dd>
+							<h:dt>create(CatalogItemView catalogItemView)</h:dt>
+								<h:dd>Uses TagService to create a tag and CombinedRecordService to create a file or archive file record</h:dd>
+							<h:dt>update(Long id, UpdateCatalogItemView updateCatalogItemView)</h:dt>
+								<h:dd>Uses CombinedRecordService to update  a file or archive file record. 
+									Updates include attaching and detaching tags.
+								</h:dd>
+							<h:dt>delete(Long id)</h:dt>
+								<h:dd>Uses TagService to delete a tag and CombinedRecordService to delete a file or archive file record</h:dd>
+						</h:dl>
+		</h:div>
+	</artifact>
+<!--  ================================================================ -->
+	<artifact id="CatalogService" type="java">	
+		<h:div>gov.noaa.ncei.cmg.tharp.service.CatalogService
+			<h:p>Repository: <h:a onclick="showNotes('Repositories')">CatalogRepository</h:a></h:p>
+			<h:p>Entity: <h:a onclick="showNotes('CatalogEntity')">CatalogEntity</h:a></h:p>
+			<h:h4 style="font-size: 125%">Public methods:</h:h4>
+			<h:dl>
+				<h:dt>search(CatalogSearchParameters searchParameters) and searchById()</h:dt>
+					<h:dd>
+						<h:ul style="line-height:100%">
+							<h:li>Returns a paginated<h:i>CatalogItem</h:i> list.</h:li>
+							<h:li>CypherdslStatementExecutor.findAll()</h:li>
+							<h:li>Condition: the <h:i>CatalogItem</h:i> is labeled as a tag with name matching the name argument, 
+								or is labeled as a Record with filepath matching the name argument.
+							</h:li>
+						</h:ul>
+					</h:dd>
+															
+				<h:dt>getCatalogItem(Long id)</h:dt>
+
+			</h:dl>
+		</h:div>
+	</artifact>
+<!--  ================================================================ -->
+	<artifact id="ExportService" type="java">
+			<h:div>gov.noaa.ncei.cmg.tharp.service.ExportService
+			<h:p>RecordExportParameters is RecordSearchParameters + output file.</h:p>
+			<h:p>TagExportParameters is TagSearchParameters + output file.</h:p>
+			<h:h4 style="font-size: 125%">Public methods:</h:h4>
+			<h:dl>
+				<h:dt>exportFiles()</h:dt>
+					<h:dd>
+						<h:ul style="line-height:100%">
+							<h:li>Returns CSV-formatted string listing information from DetailedFile objects, 
+								obtained via RecordService.getDetailedFiles(RecordExportParameters)
+							</h:li>
+						</h:ul>
+					</h:dd>
+				<h:dt>exportArchiveFiles()</h:dt>
+					<h:dd>
+						<h:ul style="line-height:100%">
+							<h:li>Returns CSV-formatted string listing information from DetailedArchiveFile objects, 
+								obtained via RecordService.getDetailedArchiveFiles(RecordExportParameters)
+							</h:li>
+						</h:ul>
+					</h:dd>
+				<h:dt>exportTags()</h:dt>								
+					<h:dd>
+						<h:ul style="line-height:100%">
+							<h:li>Returns CSV-formatted string listing information from TagView objects, 
+								obtained via TagService.getTags(TagExportParameters)
+							</h:li>
+						</h:ul>
+					</h:dd>
+			</h:dl>
+		</h:div>
+	</artifact>
+<!--  ================================================================ -->
+	<artifact id="CombinedRecordService" type="java">
+		<h:div>
+			<h:p>Uses RecordService, ArchiveFileService, TagService.</h:p>
+			<h:dl>
+				<h:dt>createFile(), updateFile(),deleteFile()</h:dt>
+					<h:dd>
+						<h:ul style="line-height:100%">
+							<h:li>Use RecordService with WriteFileView objects. TagService for tags.</h:li>
+						</h:ul>
+					</h:dd>
+															
+				<h:dt>createArchiveFile(), updateArchiveFile(), deleteArchiveFile()</h:dt>
+					<h:dd>
+						<h:ul style="line-height:100%">
+							<h:li>Use RecordService with WriteArchiveFileView objects. TagService for tags.</h:li>
+						</h:ul>
+					</h:dd>
+				
+				<h:dt>getOrSaveNewTag()</h:dt>
+					<h:dd>Creates tags as needed</h:dd>
+				
+			</h:dl>
+		</h:div>
+	</artifact>
+<!--  ================================================================ -->
+	<artifact id="RecordService" type="java">
+		<h:div></h:div>
+	</artifact>
+<!--  ================================================================ -->
+	<artifact id="StatsService" type="java">
+		<h:div></h:div>
+	</artifact>
+<!--  ================================================================ -->
+	<artifact id="TagService" type="java">
+		<h:div></h:div>
+	</artifact>
+<!--  ================================================================ -->
+	<artifact id="TokenGenerator" type="java">
+		<h:div></h:div>
+	</artifact>
+<!--  ================================================================ -->
+	<artifact id="UploadService" type="java">
+		<h:div></h:div>
+	</artifact>
+<!--  ================================================================ -->
+	<artifact id="UserService" type="java">
+		<h:div></h:div>
+	</artifact>
+<!--  ================================================================ -->
+	<artifact id="Dockerfile" type="script">
+		<h:div>
+			Builds docker image... for development?
+			<h:ul>
+				<h:li>based on amazoncorretto:11</h:li>
+				<h:li>with docker, java, Maven</h:li>
+			</h:ul>
+		</h:div>
+
+	</artifact>
+
+
+</codenotes>
