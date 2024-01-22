@@ -603,16 +603,13 @@
 					</h:ul>
 				<h:h4 style="font-size: 125%">Public methods:</h:h4>
 				<h:dl>
-					<h:dt>DetailedFile createFile(WriteFileView writeFileView)</h:dt>
-						<h:dd>
-							<h:ul style="line-height:100%">
-								<h:li>Takes a WriteFileView, returns a DetailedFile.</h:li>
-								<h:li>Neo4jTemplate.saveAs</h:li>
-								<h:li>Condition: the <h:i>CatalogItem</h:i> is labeled as a tag with name matching the name argument, 
-									or is labeled as a Record with filepath matching the name argument.
-								</h:li>
-							</h:ul>
-						</h:dd>
+					<h:dt> createFile()</h:dt>
+					<h:dd>
+						<h:ul style="line-height:100%">
+							<h:li>Takes a WriteFileView, returns a DetailedFile.</h:li>
+							<h:li>Neo4j operation: Neo4jTemplate.saveAs</h:li>
+						</h:ul>
+					</h:dd>
 				</h:dl>
 			</h:div>
 		</h:div>
