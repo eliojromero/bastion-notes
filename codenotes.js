@@ -119,20 +119,24 @@
 											// select and append icon
 											
 		var type = artifact.getAttribute("type");
+		if (type=="folder") { var iconImgSrc="folder-icon.png";}
+		if (type=="api") { var iconImgSrc="api.png";}
+		if (type=="database") { var iconImgSrc="database.png";}
+		if (type=="graph") { var iconImgSrc="graph.png";}
 		if (type=="html") { var iconImgSrc="html-icon.png";}
 		if (type=="script") { var iconImgSrc="script_icon.gif";}
 		if (type=="webservice") { var iconImgSrc="network-transmit-receive.png";}
 		if (type=="java") { var iconImgSrc="java-icon.png";}
+		if (type=="spring") { var iconImgSrc="spring.png";}
 		if (type=="xml") { var iconImgSrc="xml-icon.png";}
 		var iconImg = document.createElement("img");
 		iconImg.setAttribute("src",iconImgSrc);
 		iconImg.setAttribute("title",type);
-		iconImg.setAttribute("height","28");
-		iconImg.setAttribute("width","28");
+		iconImg.setAttribute("height","24");
+		iconImg.setAttribute("width","24");
 		artDiv.appendChild(iconImg);
 											// append artifact id
 											
-		var artId = artifact.getAttribute("id");
 		var artBaseUrl=artifact.getAttribute('baseUrl');
 		if (artBaseUrl){
 			for (var a=0; a < _artRefs.length; a++) {
@@ -141,14 +145,21 @@
 			}
 		}
 		var artSpan = document.createElement("span");
-		artSpan.appendChild(document.createTextNode(artId));
+		var artId = artifact.getAttribute("id");
+		var artAlt = artifact.getAttribute("alt");
+		if (artAlt) {
+			artSpan.appendChild(document.createTextNode(artAlt));
+		} else {
+			artSpan.appendChild(document.createTextNode(artId));
+		}
+		
 		var spanId=artId+lineNumber;
 		artSpan.setAttribute("id", spanId);
 		lineNumber++;
 		artSpan.setAttribute("name", artId);
 		if (artBaseUrl)
 			artSpan.setAttribute("onclick", "showNotes('" + artId + "','" + artBaseUrl + "','" + spanId + "')" );
-		else artSpan.setAttribute("onclick", "showNotes('"+ artId + "', '', '" + spanId + "')" );
+		else artSpan.setAttribute("onclick", "showNotes('"+ artId + "', '', '" + spanId + "','" + artAlt + "')" );
 		artDiv.appendChild(artSpan);
 											// indent
 											
@@ -313,7 +324,7 @@
 	/*=============================================
 	* showNotes()
 	* ============================================*/
-	function showNotes(artId, baseUrl, spanId){
+	function showNotes(artId, baseUrl, spanId, artAlt){
 
 		if (curentLine){ 
 			curentLine.style.backgroundColor="";
@@ -347,7 +358,11 @@
 		
 		if (notes) {
 			var notesHeading = document.createElement("h2");
-			notesHeading.appendChild(document.createTextNode(artId));
+			if (typeof artAlt  === 'string' && artAlt!='null') {
+				notesHeading.appendChild(document.createTextNode(artAlt));
+			} else {
+				notesHeading.appendChild(document.createTextNode(artId));
+			}		
 			notesDiv.appendChild(notesHeading);
 			if (isIE){
 				notesDiv.appendChild(kloneNode(notes,true));
