@@ -24,8 +24,8 @@
 	document.
 	That's it!
 	-->
-<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:h="http://www.w3.org/1999/xhtml">  
-  <xsd:import schemaLocation="http://www.w3.org/2002/08/xhtml/xhtml1-strict.xsd" namespace="http://www.w3.org/1999/xhtml" />
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:h="http://www.w3.org/1999/xhtml" > 
+  <xsd:import schemaLocation="http://www.w3.org/2002/08/xhtml/xhtml1-strict.xsd" namespace="http://www.w3.org/1999/xhtml"  />
   <xsd:group name="subGroup">
     <xsd:sequence>
       <xsd:element minOccurs="0" maxOccurs="unbounded" name="sub">
@@ -62,14 +62,20 @@
               </xsd:choice>
             </xsd:sequence>
             <xsd:attribute name="id" type="xsd:ID" use="required" />
+            <xsd:attribute name="alt"/>
             <xsd:attribute name="type" use="required">
               <xsd:simpleType>
                 <xsd:restriction base="xsd:string">
+                  <xsd:enumeration value="folder" />
+                  <xsd:enumeration value="api" />
                   <xsd:enumeration value="html" />
                   <xsd:enumeration value="script" />
                   <xsd:enumeration value="java" />
                   <xsd:enumeration value="webservice" />
                   <xsd:enumeration value="xml" />
+                  <xsd:enumeration value="database" />
+                  <xsd:enumeration value="graph" />
+                  <xsd:enumeration value="spring" />
                 </xsd:restriction>
               </xsd:simpleType>
             </xsd:attribute>

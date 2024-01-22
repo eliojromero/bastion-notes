@@ -62,7 +62,8 @@
   	font-weight: bold;
   }
   div>dl>dt {
-	font-size: larger;
+	/*font-size: larger;*/
+	font-size: 1em;
   }
   em {
 	color: #34a5eb;
