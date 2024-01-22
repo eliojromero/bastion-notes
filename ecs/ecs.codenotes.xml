@@ -592,7 +592,30 @@
 	</artifact>
 <!--  ================================================================ -->
 	<artifact id="RecordService" type="java">
-		<h:div></h:div>
+		<h:div>
+			<h:div>gov.noaa.ncei.cmg.tharp.service.RecordService
+				<h:p>Repository: <h:a onclick="showNotes('Repositories')">RecordRepository</h:a></h:p>
+				<h:p>Entities: </h:p>
+					<h:ul>
+						<h:li><h:a onclick="showNotes('RecordEntity')">RecordEntity</h:a></h:li>
+						<h:li><h:a onclick="showNotes('FileEntity')">FileEntity</h:a></h:li>
+						<h:li><h:a onclick="showNotes('ArchiveFileEntity')">ArchiveFileEntity</h:a></h:li>
+					</h:ul>
+				<h:h4 style="font-size: 125%">Public methods:</h:h4>
+				<h:dl>
+					<h:dt>DetailedFile createFile(WriteFileView writeFileView)</h:dt>
+						<h:dd>
+							<h:ul style="line-height:100%">
+								<h:li>Takes a WriteFileView, returns a DetailedFile.</h:li>
+								<h:li>Neo4jTemplate.saveAs</h:li>
+								<h:li>Condition: the <h:i>CatalogItem</h:i> is labeled as a tag with name matching the name argument, 
+									or is labeled as a Record with filepath matching the name argument.
+								</h:li>
+							</h:ul>
+						</h:dd>
+				</h:dl>
+			</h:div>
+		</h:div>
 	</artifact>
 <!--  ================================================================ -->
 	<artifact id="StatsService" type="java">
